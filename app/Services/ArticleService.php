@@ -48,15 +48,24 @@ final class ArticleService
 
     public function update(int $id, ArticleCreateDTO $dto): Article
     {
-        $data = (array) $dto;
+        $article = $this->repository->findOrFail($id);
+
+        $data = collect((array) $dto)
+            ->except(['image', 'image_path'])
+            ->all();
+
+        $oldPath = $article->image_path;
         $newPath = null;
-        if ($dto->image) {
+
+        if ($dto->image instanceof \Illuminate\Http\UploadedFile) {
             $newPath = $dto->image->store('articles/images', 'r2');
             $data['image_path'] = $newPath;
-        }
+        }   
 
-        if ($data['published_at'] === null && $data['status'] === 'published') {
+        if ($article->status == 'draft' && $article->published_at == null) {
             $data['published_at'] = now()->toDateTimeString();
+        } else {
+            $data['published_at'] = $article->published_at;
         }
 
         DB::beginTransaction();
@@ -71,15 +80,14 @@ final class ArticleService
             throw $e;
         }
 
-        $article = $this->repository->findOrFail($id);
-
-        if ($newPath && $article->image_path && $article->image_path !== $newPath) {
-            Storage::disk('r2')->delete($article->image_path);
-            Storage::disk('public')->delete($article->image_path);
+        if ($newPath && $oldPath && $oldPath !== $newPath) {
+            Storage::disk('r2')->delete($oldPath);
+            Storage::disk('public')->delete($oldPath);
         }
 
-        return $article;
+        return $article->refresh();
     }
+
 
     public function deleteById(int $id): void
     {

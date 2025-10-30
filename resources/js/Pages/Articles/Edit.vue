@@ -120,6 +120,11 @@ function submit() {
   if (imageInput.value) {
       form.image = imageInput.value.files[0];
   }
+  
+  if (form.category_id === null) {
+      form.errors.category_id = 'A categoria é obrigatória.';
+      return;
+  }
 
   form.post(route('articles.update', form.id), {
       preserveScroll: true,

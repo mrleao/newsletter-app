@@ -1,7 +1,7 @@
 <script setup>
 import SiteLayout from '@/Layouts/SiteLayout.vue'
 import Pagination from '@/Components/Tables/DefaultTable/Pagination.vue'
-import { useForm, router } from '@inertiajs/vue3'
+import { Head, useForm, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const props = defineProps({
@@ -43,6 +43,8 @@ const showFilters = ref(false)
 
 <template>
   <SiteLayout>
+    <Head title="Notícias" />
+
     <main class="mx-auto max-w-7xl p-6">
 
       <div class="mb-10 flex w-full items-center justify-between gap-3">
