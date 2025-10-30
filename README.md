@@ -1,60 +1,270 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📰 NewsApp — Laravel + Vue (Inertia) + Docker
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Um guia **boladão** pra subir o projeto do zero, desenvolver com hot‑reload e evitar as tretas mais comuns.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* **Laravel** (PHP 8.4‑FPM)
+* **Vue 3 + Vite + Inertia**
+* **Nginx** (proxy)
+* **MySQL** (ou MariaDB)
+* **Node + npm** dentro do container PHP (para `npm run dev`)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> Container PHP (nome: `newsapp`) roda Composer, Artisan e Vite.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## ✅ Pré‑requisitos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* Docker & Docker Compose (v2+)
+* Porta **80** livre (Nginx) e **5173** livre (Vite)
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🧱 Subindo o ambiente
 
-### Premium Partners
+```bash
+# 1) Build (limpo)
+docker compose build --no-cache
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 2) Subir containers
+docker compose up -d
 
-## Contributing
+# 3) Entrar no container PHP (newsapp)
+docker exec -it newsapp bash   # (ou sh)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 4) Dependências do backend
+composer install
 
-## Code of Conduct
+# 5) Dependências do front
+npm install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 6) Copiar o .env
+cp .env.example .env
 
-## Security Vulnerabilities
+# 7) Gerar APP_KEY
+php artisan key:generate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 8) Rodar migrações (ajuste DB no .env antes)
+php artisan migrate
 
-## License
+# 9) Linkar storage público (uploads)
+php artisan storage:link
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# newsletter-app
+# 10) Subir o Vite (dev)
+npm run dev
+```
+
+Acesse: **[http://localhost](http://localhost)**
+
+> Dica: mantenha um terminal no `npm run dev` e outro no `docker compose logs -f` para acompanhar os logs.
+
+---
+
+## ⚙️ Configuração do `.env`
+
+```dotenv
+APP_NAME="NewsApp"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost
+
+# Banco (ajuste conforme seu docker-compose)
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=newsapp
+DB_USERNAME=root
+DB_PASSWORD=root
+
+# Arquivos e sessão
+FILESYSTEM_DISK=public
+SESSION_DRIVER=file
+
+# Vite / HMR
+VITE_PORT=5173
+VITE_APP_URL=http://localhost
+```
+
+> Se for Postgres, troque `DB_CONNECTION`, porta e credenciais.
+
+---
+
+## 🧩 Vite (rodando no container)
+
+Para HMR funcionar via Docker, deixe o Vite acessível na rede:
+
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import laravel from 'laravel-vite-plugin'
+
+export default defineConfig({
+  server: {
+    host: true, // 0.0.0.0
+    port: parseInt(process.env.VITE_PORT) || 5173,
+    hmr: { host: 'localhost' },
+  },
+  plugins: [
+    laravel({
+      input: ['resources/css/app.css', 'resources/js/app.js'],
+      refresh: true,
+    }),
+  ],
+})
+```
+
+---
+
+## 📁 Estrutura útil
+
+```
+public/               # assets públicos
+public/storage -> storage/app/public (symlink)
+resources/            # Vue/Blade/Styles
+storage/app/public    # uploads (não versionar)
+storage/app/private   # arquivos privados (não web)
+```
+
+> **Não** versione o conteúdo de `storage/`. Use `.env.example` e **`php artisan storage:link`** para servir uploads.
+
+---
+
+## 🔧 Comandos úteis
+
+```bash
+# Shell no container PHP
+docker exec -it newsapp bash
+
+# Logs
+docker compose logs -f nginx
+
+# Reset do banco (cuidado!)
+php artisan migrate:fresh --seed
+
+# Cache/config
+php artisan config:clear && php artisan route:clear && php artisan view:clear
+
+# Build de produção
+docker exec -it newsapp bash -lc "npm ci && npm run build"
+```
+
+---
+
+## 🧪 Pacotes do Front mais comuns
+
+```bash
+npm i vue-select @vueup/vue-quill quill
+```
+
+Uso:
+
+```js
+// Exemplo Quill (VueUp)
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
+
+// Exemplo vue-select
+import vSelect from 'vue-select'
+import 'vue-select/dist/vue-select.css'
+```
+
+---
+
+## 🛡️ Permissões
+
+```bash
+# No host ou dentro do container
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R ug+rwX storage bootstrap/cache
+```
+
+---
+
+## 🧰 Troubleshooting (erros comuns)
+
+### 1) `could not find driver` (PDO)
+
+* Garanta que a imagem PHP instalou `pdo_mysql`.
+* Confirme: `php -m | grep pdo_mysql` dentro do container.
+* Confira `DB_HOST` (nome do serviço no docker‑compose), usuário e senha.
+* Espere o banco subir: `docker compose logs -f mysql`.
+
+### 2) `413 Request Entity Too Large` (uploads no Nginx)
+
+No vhost Nginx, aumente o limite:
+
+```nginx
+client_max_body_size 20m;
+client_body_timeout 60s;
+```
+
+Recarregue o Nginx e tente de novo.
+
+### 3) Vite não atualiza / HMR não conecta
+
+* Libere a porta `5173` no `docker-compose.yml` (ex: `5173:5173`).
+* Use `server.host = true` e `hmr.host = 'localhost'` no `vite.config.js`.
+* Verifique se `APP_URL`/`VITE_APP_URL` apontam para `http://localhost`.
+
+### 4) `@vueup/vue-quill` / `vue-select` não encontrados
+
+* Rode `npm install` (ou `npm i @vueup/vue-quill quill vue-select`).
+* Reinicie o Vite (`Ctrl+C` e `npm run dev`).
+
+### 5) Storage sem servir imagens
+
+* Rode `php artisan storage:link`.
+* Use `Storage::url('path/no_image.png')` (para `storage/app/public`).
+* Para fallback estático, use `asset('assets/image/no_image.png')` (arquivo em `public/assets/...`).
+
+### 6) Node/NPM no build do container (exit 100)
+
+* No Dockerfile, rode o script da NodeSource e **instale no mesmo RUN**:
+
+```Dockerfile
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs \
+    && npm i -g npm@latest
+```
+
+* Evite limpar o cache **antes** da instalação.
+
+---
+
+## 🧯 Dicas de Git (storage)
+
+`.gitignore` recomendado:
+
+```gitignore
+/storage/*
+!/storage/app/.gitignore
+!/storage/framework/.gitignore
+!/storage/logs/.gitignore
+/public/storage
+```
+
+---
+
+## 🏁 Fluxo diário de dev (resumo)
+
+1. `docker compose up -d`
+2. `docker exec -it newsapp bash`
+3. `npm run dev` (deixe rodando)
+4. Codar feliz ⚡
+
+---
+
+## 🌐 URLs
+
+* App: **[http://localhost](http://localhost)**
+* Vite (dev assets/HMR): **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+## 📜 Licença
+
+Este projeto segue a licença definida no repositório
