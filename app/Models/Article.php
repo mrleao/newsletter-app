@@ -36,10 +36,11 @@ class Article extends Model
 
     public function getImagePathAttribute()
     {
-        if ($this->attributes['image_path']) {
-            return asset('storage/' . $this->attributes['image_path']);
+        if (!$this->attributes['image_path']) {
+            return null;
         }
-        return asset('assets/images/no_image.png');
+        // Se tiver 'url' configurado no disco, isso gera a URL completa
+        return Storage::disk('r2')->url($this->attributes['image_path']);
     }
 
     public function getRouteKeyName(): string

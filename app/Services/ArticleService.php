@@ -6,6 +6,7 @@ use App\DTOs\ArticleCreateDTO;
 use App\Models\Article;
 use App\Repositories\ArticleRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 
 final class ArticleService
 {
@@ -20,8 +21,9 @@ final class ArticleService
     public function create(ArticleCreateDTO $dto): Article
     {
         $data = (array) $dto;
+
         if ($dto->image) {
-            $data['image_path'] = $dto->image->store('articles/images', 'public');
+            $data['image_path'] = $dto->image->store('articles/images', 'r2');
         }
 
         if ($data['published_at'] === null && $data['status'] === 'published') {
