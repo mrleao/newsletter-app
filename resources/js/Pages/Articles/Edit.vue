@@ -161,10 +161,10 @@ const selectNewimage = () => { imageInput.value?.click() }
 </script>
 
 <template>
-  <AppLayout title="Criar artigo">
+  <AppLayout title="Editar artigo">
     <template #header>
       <div class="flex items-center gap-3">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Criar artigos</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editar artigo</h2>
       </div>
     </template>
 

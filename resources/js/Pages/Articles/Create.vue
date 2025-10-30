@@ -108,7 +108,7 @@ function submit() {
   if (imageInput.value) {
       form.image = imageInput.value.files[0];
   }
-  
+
   if (form.category_id === null) {
       form.errors.category_id = 'A categoria é obrigatória.';
       return;
@@ -134,7 +134,7 @@ const selectNewimage = () => { imageInput.value?.click() }
   <AppLayout title="Criar artigo">
     <template #header>
       <div class="flex items-center gap-3">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Criar artigos</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Criar artigo</h2>
       </div>
     </template>
 
