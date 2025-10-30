@@ -21,9 +21,12 @@ services:
     restart: unless-stopped
     ports:
       - 80:80
+      - "443:443"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx:/etc/nginx/conf.d
+      - ./docker/nginx/certs/origin.pem:/etc/nginx/certs/origin.pem:ro
+      - ./docker/nginx/certs/origin.key:/etc/nginx/certs/origin.key:ro
     networks:
       - newsapp-network
 
