@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
-import ApplicationMark from '@/Components/ApplicationMark.vue'
 import Banner from '@/Components/Banner.vue'
 import Dropdown from '@/Components/Dropdown.vue'
 import DropdownLink from '@/Components/DropdownLink.vue'
@@ -141,12 +140,9 @@ const logout = () => {
 
         <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }" class="sm:hidden">
           <div class="space-y-1 pt-2 pb-3">
-            <ResponsiveNavLink v-if="isLoggedIn" :href="route('dashboard')" :active="route().current('dashboard')">
-              Dashboard
-            </ResponsiveNavLink>
-            <ResponsiveNavLink href="#contact" :active="false">
-              Contato
-            </ResponsiveNavLink>
+            <ResponsiveNavLink v-if="isLoggedIn" :href="route('site.articles.page')">Noíticas</ResponsiveNavLink>
+            <ResponsiveNavLink v-if="isLoggedIn" :href="route('articles.index')">Gerenciar Noticias</ResponsiveNavLink>
+            <ResponsiveNavLink v-if="isLoggedIn" :href="route('categories.index')">Gerenciar Categorias</ResponsiveNavLink>
           </div>
 
           <div class="border-t border-gray-200 pb-1 pt-4">

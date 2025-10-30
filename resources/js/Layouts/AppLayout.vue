@@ -156,9 +156,9 @@ const logout = () => {
                 <!-- Responsive Navigation Menu -->
                 <div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="sm:hidden">
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('site.articles.page')">Visitar site</ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('articles.index')">Gerenciar Noticias</ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('categories.index')">Gerenciar Categorias</ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
