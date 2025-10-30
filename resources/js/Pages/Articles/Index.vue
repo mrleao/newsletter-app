@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NewRegisterButton from '@/Components/Buttons/NewRegisterButton.vue'
 import ActionTd from '@/Components/Tables/DefaultTable/ActionTd.vue'
