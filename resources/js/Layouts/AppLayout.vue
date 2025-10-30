@@ -206,7 +206,7 @@ const logout = () => {
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto">
+            <main class="flex-1">
                 <div class="mx-auto">
                     <div class="py-2">
                         <div :class="width" class="mt-10 max-w-7xl sm:px-6 lg:px-8 mx-auto p-4 bg-white">

@@ -6,6 +6,7 @@ use App\DTOs\ArticleCreateDTO;
 use App\Models\Article;
 use App\Repositories\ArticleRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 final class ArticleService
@@ -21,7 +22,7 @@ final class ArticleService
     public function create(ArticleCreateDTO $dto): Article
     {
         $data = (array) $dto;
-
+        $resp = null;
         if ($dto->image) {
             $data['image_path'] = $dto->image->store('articles/images', 'r2');
         }
@@ -30,21 +31,54 @@ final class ArticleService
             $data['published_at'] = now()->toDateTimeString();
         }
 
-        return $this->repository->create($data);
+        DB::beginTransaction();
+        try {
+            $resp = $this->repository->create($data);
+            DB::commit();
+        } catch (\Throwable $e) {
+            if ($data['image_path']) {
+                Storage::disk('r2')->delete($data['image_path']);
+            }
+            DB::rollBack();
+            throw $e;
+        }
+
+        return $resp;
     }
 
     public function update(int $id, ArticleCreateDTO $dto): Article
     {
         $data = (array) $dto;
+        $newPath = null;
         if ($dto->image) {
-            $data['image_path'] = $dto->image->store('articles/images', 'public');
+            $newPath = $dto->image->store('articles/images', 'r2');
+            $data['image_path'] = $newPath;
         }
 
         if ($data['published_at'] === null && $data['status'] === 'published') {
             $data['published_at'] = now()->toDateTimeString();
         }
-        $this->repository->update($id, $data);
-        return $this->repository->findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            $this->repository->update($id, $data);
+            DB::commit();
+        } catch (\Throwable $e) {
+            if ($newPath) {
+                Storage::disk('r2')->delete($newPath);
+            }
+            DB::rollBack();
+            throw $e;
+        }
+
+        $article = $this->repository->findOrFail($id);
+
+        if ($newPath && $article->image_path && $article->image_path !== $newPath) {
+            Storage::disk('r2')->delete($article->image_path);
+            Storage::disk('public')->delete($article->image_path);
+        }
+
+        return $article;
     }
 
     public function deleteById(int $id): void
