@@ -28,3 +28,5 @@ Thumbs.db
 !/storage/logs/.gitignore
 !/storage/app/public/.gitignore
 /storage/app/public/*
+composer.lock
+package-lock.json
